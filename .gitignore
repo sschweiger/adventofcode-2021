@@ -369,7 +369,6 @@ $RECYCLE.BIN/
 *.terraform/
 *.terraform.lock.hcl
 /.run/
-/gradle/wrapper/gradle-wrapper.jar
-/gradle/wrapper/gradle-wrapper.properties
+
 /gradlew
 /gradlew.bat

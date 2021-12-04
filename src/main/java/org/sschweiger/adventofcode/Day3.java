@@ -1,125 +1,103 @@
 package org.sschweiger.adventofcode;
 
-import java.io.IOException;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.Paths;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.sschweiger.adventofcode.utils.AoCUtils;
+
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.function.Function;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 public class Day3 {
 
-	private static final Logger LOGGER = Logger.getLogger(Day3.class.getName());
+    private static final Logger LOGGER = LoggerFactory.getLogger(Day3.class);
 
-	public static void main(String[] args) {
-		var app = new Day3();
-		app.run("src/main/resources/day3.test");
-		app.run("src/main/resources/day3.data");
-	}
+    public static void main(String[] args) {
+        var app = new Day3();
+        app.run("src/main/resources/day3.test");
+        app.run("src/main/resources/day3.data");
+    }
 
-	public void run(String input) {
-		LOGGER.log(Level.INFO, "input: {0}", input);
-		var lines = readFromFile(input);
+    public void run(String input) {
+        var lines = AoCUtils.readAllLines(input);
 
-		calculatePowerConsumption(lines);
-		calculateLifeSupportRating(lines);
-	}
+        calculatePowerConsumption(lines);
+        calculateLifeSupportRating(lines);
+    }
 
-	private void calculatePowerConsumption(List<String> lines) {
-		var counters = getBitCounters(lines);
+    private void calculatePowerConsumption(List<String> lines) {
+        var counters = getBitCounters(lines);
 
-		var gamma = new StringBuilder();
-		var epsilon = new StringBuilder();
-		for (var counter : counters) {
-			gamma.append(counter.getMostCommonBit());
-			epsilon.append(counter.getLeastCommonBit());
-		}
+        var gammaBytes = new StringBuilder();
+        var epsilonBytes = new StringBuilder();
+        for (var counter : counters) {
+            gammaBytes.append(counter.getMostCommonBit());
+            epsilonBytes.append(counter.getLeastCommonBit());
+        }
 
-		var gammaDecimal = Integer.parseInt(gamma.toString(), 2);
-		var epsilonDecimal = Integer.parseInt(epsilon.toString(), 2);
+        var gamma = Integer.parseInt(gammaBytes.toString(), 2);
+        var epsilon = Integer.parseInt(epsilonBytes.toString(), 2);
 
-		LOGGER.info("gamma=" + gamma + ", " + gammaDecimal);
-		LOGGER.info("epsilon=" + epsilon + ", " + epsilonDecimal);
-		LOGGER.info("result=" + gammaDecimal * epsilonDecimal);
-	}
+        LOGGER.info("part 1: gamma={}, epsilon={}, result={}", gamma, epsilon, gamma * epsilon);
+    }
 
-	private void calculateLifeSupportRating(List<String> lines) {
-		var oxygenGeneratorRating = filterOnBit(lines, BitCounter::getMostCommonBit);
-		var oxygenGeneratorRatingDecimal = Integer.parseInt(oxygenGeneratorRating, 2);
+    private void calculateLifeSupportRating(List<String> lines) {
+        var oxygenGeneratorRating = Integer.parseInt(filterOnBit(lines, BitCounter::getMostCommonBit), 2);
+        var co2ScrubberRating = Integer.parseInt(filterOnBit(lines, BitCounter::getLeastCommonBit), 2);
 
-		var co2ScrubberRating = filterOnBit(lines, BitCounter::getLeastCommonBit);
-		var co2ScrubberRatingDecimal = Integer.parseInt(co2ScrubberRating, 2);
+        LOGGER.info("part 2: oxygen={}, co2scrubber={}, result={}", oxygenGeneratorRating, co2ScrubberRating, oxygenGeneratorRating * co2ScrubberRating);
+    }
 
-		LOGGER.info("oxygenGeneratorRating: " + oxygenGeneratorRating + ", " + oxygenGeneratorRatingDecimal);
-		LOGGER.info("co2ScrubberRating: " + co2ScrubberRating + ", " + co2ScrubberRatingDecimal);
-		LOGGER.info("life support rating = " + oxygenGeneratorRatingDecimal * co2ScrubberRatingDecimal);
-	}
+    private String filterOnBit(List<String> lines, Function<BitCounter, Character> retrieveBit) {
+        var tempList = new ArrayList<>(lines);
+        for (var i = 0; i < lines.get(0).length(); i++) {
+            var counters = getBitCounters(tempList);
+            var counter = counters.get(i);
 
-	private String filterOnBit(List<String> lines, Function<BitCounter, Character> retrieveBit) {
-		var tempList = new ArrayList<>(lines);
-		for (var i = 0; i < lines.get(0).length(); i++) {
-			var counters = getBitCounters(tempList);
-			var counter = counters.get(i);
+            final var bit = retrieveBit.apply(counter);
+            final int pos = i;
+            tempList.removeIf(line -> line.charAt(pos) != bit);
 
-			final var bit = retrieveBit.apply(counter);
-			final int pos = i;
-			tempList.removeIf(line -> line.charAt(pos) != bit);
+            if (tempList.size() == 1) {
+                return tempList.get(0);
+            }
+        }
 
-			if (tempList.size() == 1) {
-				return tempList.get(0);
-			}
-		}
+        return "";
+    }
 
-		return "";
-	}
+    private List<BitCounter> getBitCounters(List<String> lines) {
+        var digits = lines.get(0).length();
+        var counters = new ArrayList<BitCounter>();
+        for (var i = 0; i < digits; i++) {
+            var counter = new BitCounter();
+            counter.count(lines, i);
+            counters.add(counter);
+        }
 
-	private List<BitCounter> getBitCounters(List<String> lines) {
-		var digits = lines.get(0).length();
-		var counters = new ArrayList<BitCounter>();
-		for (var i = 0; i < digits; i++) {
-			var counter = new BitCounter();
-			counter.count(lines, i);
-			counters.add(counter);
-		}
+        return counters;
+    }
 
-		return counters;
-	}
+    private class BitCounter {
+        int cntZero = 0;
+        int cntOne = 0;
 
-	private class BitCounter {
+        void count(List<String> lines, int position) {
+            for (String line : lines) {
+                char c = line.charAt(position);
+                switch (c) {
+                    case '0' -> cntZero++;
+                    case '1' -> cntOne++;
+                }
+            }
+        }
 
-		int cntZero = 0;
-		int cntOne = 0;
+        char getMostCommonBit() {
+            return cntZero > cntOne ? '0' : '1';
+        }
 
-		void count(List<String> lines, int position) {
-			for (String line : lines) {
-				char c = line.charAt(position);
-				switch (c) {
-					case '0' -> cntZero++;
-					case '1' -> cntOne++;
-				}
-			}
-		}
-
-		char getMostCommonBit() {
-			return cntZero > cntOne ? '0' : '1';
-		}
-
-		char getLeastCommonBit() {
-			return cntOne < cntZero ? '1' : '0';
-		}
-	}
-
-	private List<String> readFromFile(String input) {
-		try {
-			return Files.readAllLines(Paths.get(input), StandardCharsets.UTF_8);
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-
-		return Collections.emptyList();
-	}
+        char getLeastCommonBit() {
+            return cntOne < cntZero ? '1' : '0';
+        }
+    }
 }

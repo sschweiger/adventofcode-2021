@@ -1,84 +1,68 @@
 package org.sschweiger.adventofcode;
 
-import java.io.BufferedReader;
-import java.io.FileReader;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.sschweiger.adventofcode.utils.AoCUtils;
+
+import java.util.List;
 
 // https://adventofcode.com/2021/day/2
 public class Day2 {
+    private static final Logger LOGGER = LoggerFactory.getLogger(Day2.class);
 
-	public static void main(String[] args) {
-		var app = new Day2();
-		app.run();
-		app.run2();
-	}
+    public static void main(String[] args) {
+        var app = new Day2();
+        app.run("src/main/resources/day2.test");
+        app.run("src/main/resources/day2.data");
+    }
 
-	public void run() {
-		try (BufferedReader reader = new BufferedReader(new FileReader("src/main/resources/day2.data"))) {
-			int horizontalPosition = 0;
-			int verticalPosition = 0;
+    public void run(String input) {
+        List<String> lines = AoCUtils.readAllLines(input);
+        part1(lines);
+        part2(lines);
+    }
 
-			String line;
-			while ((line = reader.readLine()) != null) {
-				var parts = line.split(" ");
+    private void part1(List<String> lines) {
+        int horizontalPosition = 0;
+        int verticalPosition = 0;
 
-				var command = parts[0];
-				var value = Integer.parseInt(parts[1]);
+        for (var line : lines) {
+            var parts = line.split(" ");
 
-				switch (command) {
-					case "forward":
-						horizontalPosition += value;
-						break;
-					case "down":
-						verticalPosition += value;
-						break;
-					case "up":
-						verticalPosition -= value;
-						break;
-				}
-			}
+            var command = parts[0];
+            var value = Integer.parseInt(parts[1]);
 
-			System.out.println("results part 1");
-			System.out.println("horizontalPosition: " + horizontalPosition);
-			System.out.println("verticalPosition: " + verticalPosition);
-			System.out.println("result: " + horizontalPosition * verticalPosition);
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-	}
+            switch (command) {
+                case "forward" -> horizontalPosition += value;
+                case "down" -> verticalPosition += value;
+                case "up" -> verticalPosition -= value;
+            }
+        }
 
-	public void run2() {
-		try (BufferedReader reader = new BufferedReader(new FileReader("src/main/resources/day2.data"))) {
-			int horizontalPosition = 0;
-			int verticalPosition = 0;
-			int aim = 0;
+        LOGGER.info("part 1: horizontal={}, vertical={}, result={}", horizontalPosition, verticalPosition, horizontalPosition * verticalPosition);
+    }
 
-			String line;
-			while ((line = reader.readLine()) != null) {
-				var parts = line.split(" ");
+    private void part2(List<String> lines) {
+        int horizontalPosition = 0;
+        int verticalPosition = 0;
+        int aim = 0;
 
-				var command = parts[0];
-				var value = Integer.parseInt(parts[1]);
+        for (var line : lines) {
+            var parts = line.split(" ");
 
-				switch (command) {
-					case "forward":
-						horizontalPosition += value;
-						verticalPosition += aim * value;
-						break;
-					case "down":
-						aim += value;
-						break;
-					case "up":
-						aim -= value;
-						break;
-				}
-			}
+            var command = parts[0];
+            var value = Integer.parseInt(parts[1]);
 
-			System.out.println("results part 2");
-			System.out.println("horizontalPosition: " + horizontalPosition);
-			System.out.println("verticalPosition: " + verticalPosition);
-			System.out.println("result: " + horizontalPosition * verticalPosition);
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-	}
+            switch (command) {
+                case "forward" -> {
+                    horizontalPosition += value;
+                    verticalPosition += aim * value;
+                }
+                case "down" -> aim += value;
+                case "up" -> aim -= value;
+            }
+        }
+
+        LOGGER.info("part 2: horizontal={}, vertical={}, result={}", horizontalPosition, verticalPosition, horizontalPosition * verticalPosition);
+    }
 }
