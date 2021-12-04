@@ -1,47 +1,58 @@
 package org.sschweiger.adventofcode;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.sschweiger.adventofcode.day4.BingoBoard;
 import org.sschweiger.adventofcode.day4.BingoParser;
 
-import java.util.ArrayList;
+import java.util.List;
 
-public class Day4 {
-    private static final Logger LOGGER = LoggerFactory.getLogger(Day4.class);
-
+public class Day4 extends AdventOfCodeRunner {
     public static void main(String[] args) {
         var app = new Day4();
-        app.run("src/main/resources/day4.test");
-        app.run("src/main/resources/day4.data");
+        app.run();
     }
 
-    public void run(String input) {
-        LOGGER.info("start playing bingo for input {}", input);
-        var parser = new BingoParser(input);
+    @Override
+    protected int getDay() {
+        return 4;
+    }
+
+    @Override
+    protected void part1(List<String> lines) {
+        var parser = new BingoParser(lines);
         parser.parse(5);
         var boards = parser.getBoards();
         var numbers = parser.getDrawNumbers();
 
-        var finishedBoards = new ArrayList<BingoBoard>();
+        for (var number : numbers) {
+            for (var board : boards) {
+                if (board.drawNumber(number)) {
+                    var sum = board.getSumOfRemainingNumbers();
+                    LOGGER.info("Bingo! result = {} * {} = {}", sum, number, sum * number);
+                    return;
+                }
+            }
+        }
+    }
+
+    @Override
+    protected void part2(List<String> lines) {
+        var parser = new BingoParser(lines);
+        parser.parse(5);
+        var boards = parser.getBoards();
+        var numbers = parser.getDrawNumbers();
+
         for (var number : numbers) {
             for (int i = 0; i < boards.size(); i++) {
                 var board = boards.get(i);
                 if (board.drawNumber(number)) {
-                    var sum = board.getSumOfRemainingNumbers();
-                    LOGGER.info("Bingo! result = {} * {} = {}", sum, number, sum * number);
-
-                    finishedBoards.add(board);
                     boards.remove(i);
+                    if (boards.isEmpty()) {
+                        var sum = board.getSumOfRemainingNumbers();
+                        LOGGER.info("Bingo on last board! result = {} * {} = {}", sum, number, sum * number);
+                        return;
+                    }
+
                     i--;
                 }
-            }
-
-            if (boards.isEmpty()) {
-                var lastBoard = finishedBoards.get(finishedBoards.size() - 1);
-                var sum = lastBoard.getSumOfRemainingNumbers();
-                LOGGER.info("Bingo on last board! result = {} * {} = {}", sum, number, sum * number);
-                break;
             }
         }
     }

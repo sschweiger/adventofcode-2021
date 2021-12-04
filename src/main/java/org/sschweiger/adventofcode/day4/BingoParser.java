@@ -2,33 +2,26 @@ package org.sschweiger.adventofcode.day4;
 
 import org.apache.commons.lang3.StringUtils;
 
-import java.io.IOException;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 public class BingoParser {
-    private final String input;
+    private final List<String> lines;
     private final List<BingoBoard> boards = new ArrayList<>();
     private final List<Integer> drawNumbers = new ArrayList<>();
 
-    public BingoParser(String input) {
-        this.input = input;
+    public BingoParser(List<String> lines) {
+        this.lines = new ArrayList<>(lines);
     }
 
     public void parse(int boardSize) {
-        var lines = readFromFile(input);
         for (var number : lines.get(0).split(",")) {
             drawNumbers.add(Integer.parseInt(number));
         }
 
-        lines.remove(0);
-
         List<String> rows = new ArrayList<>();
-        for (var line : lines) {
+        for (int i = 1; i < lines.size(); i++) {
+            String line = lines.get(i);
             if (StringUtils.isBlank(line)) {
                 if (!rows.isEmpty()) {
                     boards.add(new BingoBoard(rows, boardSize));
@@ -49,15 +42,5 @@ public class BingoParser {
 
     public List<Integer> getDrawNumbers() {
         return drawNumbers;
-    }
-
-    private List<String> readFromFile(String input) {
-        try {
-            return Files.readAllLines(Paths.get(input), StandardCharsets.UTF_8);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
-        return Collections.emptyList();
     }
 }
