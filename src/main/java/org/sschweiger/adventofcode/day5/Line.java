@@ -31,18 +31,14 @@ public class Line {
         var distanceY = LongStream.rangeClosed(Long.min(from.y, to.y), Long.max(from.y, to.y)).count();
 
         var distance = isVertical() ? distanceY : distanceX;
-        var xModifier = isVertical() ? 0 : from.x > to.x ? -1 : 1;
-        var yModifier = isHorizontal() ? 0 : from.y > to.y ? -1 : 1;
+        var xIncrement = isVertical() ? 0 : from.x > to.x ? -1 : 1;
+        var yIncrement = isHorizontal() ? 0 : from.y > to.y ? -1 : 1;
 
-        return generatePoints(distance, xModifier, yModifier);
-    }
-
-    private Collection<Point> generatePoints(long distance, int xModifier, int yModifier) {
         var points = new ArrayList<Point>();
         var current = from;
         for (int i = 0; i < distance; i++) {
             points.add(current);
-            current = new Point(current.x + xModifier, current.y + yModifier);
+            current = new Point(current.x + xIncrement, current.y + yIncrement);
         }
 
         return points;
