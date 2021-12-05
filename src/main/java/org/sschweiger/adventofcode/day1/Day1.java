@@ -1,27 +1,18 @@
-package org.sschweiger.adventofcode;
+package org.sschweiger.adventofcode.day1;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.sschweiger.adventofcode.utils.AoCUtils;
+import org.sschweiger.adventofcode.AdventOfCodePuzzle;
 
 import java.util.List;
 
-public class Day1 {
-    private static final Logger LOGGER = LoggerFactory.getLogger(Day1.class);
+public class Day1 extends AdventOfCodePuzzle {
 
-    public static void main(String[] args) {
-        var app = new Day1();
-        app.run("src/main/resources/day1.test");
-        app.run("src/main/resources/day1.data");
+    @Override
+    protected int getDay() {
+        return 1;
     }
 
-    public void run(String input) {
-        var lines = AoCUtils.readAllLines(input);
-        part1(lines);
-        part2(lines);
-    }
-
-    private void part1(List<String> lines) {
+    @Override
+    protected long part1(List<String> lines) {
         int numberOfIncreasedMeasurements = 0;
         int numberOfDecreasedMeasurements = 0;
 
@@ -40,9 +31,11 @@ public class Day1 {
         }
 
         LOGGER.info("part 1: increased={}, decreased={}", numberOfIncreasedMeasurements, numberOfDecreasedMeasurements);
+        return numberOfIncreasedMeasurements;
     }
 
-    private void part2(List<String> lines) {
+    @Override
+    protected long part2(List<String> lines) {
         int numberOfIncreasedMeasurements = 0;
         int numberOfDecreasedMeasurements = 0;
 
@@ -62,6 +55,7 @@ public class Day1 {
         }
 
         LOGGER.info("part 2: increased={}, decreased={}", numberOfIncreasedMeasurements, numberOfDecreasedMeasurements);
+        return numberOfIncreasedMeasurements;
     }
 
     private int getSumOfLines(List<String> lines, int startIndex, int numberOfRecords) {

@@ -1,28 +1,19 @@
-package org.sschweiger.adventofcode;
+package org.sschweiger.adventofcode.day2;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.sschweiger.adventofcode.utils.AoCUtils;
+import org.sschweiger.adventofcode.AdventOfCodePuzzle;
 
 import java.util.List;
 
 // https://adventofcode.com/2021/day/2
-public class Day2 {
-    private static final Logger LOGGER = LoggerFactory.getLogger(Day2.class);
+public class Day2 extends AdventOfCodePuzzle {
 
-    public static void main(String[] args) {
-        var app = new Day2();
-        app.run("src/main/resources/day2.test");
-        app.run("src/main/resources/day2.data");
+    @Override
+    protected int getDay() {
+        return 2;
     }
 
-    public void run(String input) {
-        List<String> lines = AoCUtils.readAllLines(input);
-        part1(lines);
-        part2(lines);
-    }
-
-    private void part1(List<String> lines) {
+    @Override
+    protected long part1(List<String> lines) {
         int horizontalPosition = 0;
         int verticalPosition = 0;
 
@@ -39,10 +30,13 @@ public class Day2 {
             }
         }
 
-        LOGGER.info("part 1: horizontal={}, vertical={}, result={}", horizontalPosition, verticalPosition, horizontalPosition * verticalPosition);
+        var result = horizontalPosition * verticalPosition;
+        LOGGER.info("part 1: horizontal={}, vertical={}, result={}", horizontalPosition, verticalPosition, result);
+        return result;
     }
 
-    private void part2(List<String> lines) {
+    @Override
+    protected long part2(List<String> lines) {
         int horizontalPosition = 0;
         int verticalPosition = 0;
         int aim = 0;
@@ -63,6 +57,8 @@ public class Day2 {
             }
         }
 
-        LOGGER.info("part 2: horizontal={}, vertical={}, result={}", horizontalPosition, verticalPosition, horizontalPosition * verticalPosition);
+        var result = horizontalPosition * verticalPosition;
+        LOGGER.info("part 2: horizontal={}, vertical={}, result={}", horizontalPosition, verticalPosition, result);
+        return result;
     }
 }

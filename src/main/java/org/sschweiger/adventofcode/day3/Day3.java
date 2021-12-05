@@ -1,31 +1,29 @@
-package org.sschweiger.adventofcode;
+package org.sschweiger.adventofcode.day3;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.sschweiger.adventofcode.utils.AoCUtils;
+import org.sschweiger.adventofcode.AdventOfCodePuzzle;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Function;
 
-public class Day3 {
+public class Day3 extends AdventOfCodePuzzle {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(Day3.class);
-
-    public static void main(String[] args) {
-        var app = new Day3();
-        app.run("src/main/resources/day3.test");
-        app.run("src/main/resources/day3.data");
+    @Override
+    protected int getDay() {
+        return 3;
     }
 
-    public void run(String input) {
-        var lines = AoCUtils.readAllLines(input);
-
-        calculatePowerConsumption(lines);
-        calculateLifeSupportRating(lines);
+    @Override
+    protected long part1(List<String> lines) {
+        return calculatePowerConsumption(lines);
     }
 
-    private void calculatePowerConsumption(List<String> lines) {
+    @Override
+    protected long part2(List<String> lines) {
+        return calculateLifeSupportRating(lines);
+    }
+
+    private long calculatePowerConsumption(List<String> lines) {
         var counters = getBitCounters(lines);
 
         var gammaBytes = new StringBuilder();
@@ -37,15 +35,19 @@ public class Day3 {
 
         var gamma = Integer.parseInt(gammaBytes.toString(), 2);
         var epsilon = Integer.parseInt(epsilonBytes.toString(), 2);
+        var result = gamma * epsilon;
 
-        LOGGER.info("part 1: gamma={}, epsilon={}, result={}", gamma, epsilon, gamma * epsilon);
+        LOGGER.info("part 1: gamma={}, epsilon={}, result={}", gamma, epsilon, result);
+        return result;
     }
 
-    private void calculateLifeSupportRating(List<String> lines) {
+    private long calculateLifeSupportRating(List<String> lines) {
         var oxygenGeneratorRating = Integer.parseInt(filterOnBit(lines, BitCounter::getMostCommonBit), 2);
         var co2ScrubberRating = Integer.parseInt(filterOnBit(lines, BitCounter::getLeastCommonBit), 2);
+        var result = oxygenGeneratorRating * co2ScrubberRating;
 
-        LOGGER.info("part 2: oxygen={}, co2scrubber={}, result={}", oxygenGeneratorRating, co2ScrubberRating, oxygenGeneratorRating * co2ScrubberRating);
+        LOGGER.info("part 2: oxygen={}, co2scrubber={}, result={}", oxygenGeneratorRating, co2ScrubberRating, result);
+        return result;
     }
 
     private String filterOnBit(List<String> lines, Function<BitCounter, Character> retrieveBit) {
