@@ -5,12 +5,20 @@ import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class Day6Test {
+	@Test
+	void shouldRunWithSampleDataFor18Days() {
+		var day6 = new Day6();
+		var result = day6.runSample(18);
+
+		assertEquals(26, result);
+	}
+
     @Test
     void shouldRunPart1WithSampleData() {
         var day6 = new Day6();
         var result = day6.testPart1();
 
-        assertEquals(5, result);
+        assertEquals(5934, result);
     }
 
     @Test
@@ -24,7 +32,7 @@ class Day6Test {
         var day6 = new Day6();
         var result = day6.testPart2();
 
-        assertEquals(12, result);
+        assertEquals(26984457539L, result);
     }
 
     @Test
