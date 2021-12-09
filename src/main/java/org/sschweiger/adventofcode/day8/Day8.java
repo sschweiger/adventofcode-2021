@@ -17,9 +17,9 @@ public class Day8 extends AdventOfCodePuzzle {
         for (var line : lines) {
             var segments = line.split(" \\| ")[1].split(" ");
             result += Arrays.stream(segments)
-                    .map(String::length)
-                    .filter(length -> List.of(2, 3, 4, 7).contains(length))
-                    .count();
+                .map(String::length)
+                .filter(length -> List.of(2, 3, 4, 7).contains(length))
+                .count();
 
         }
 
@@ -37,9 +37,9 @@ public class Day8 extends AdventOfCodePuzzle {
             var codes = new HashMap<Integer, String>();
             for (var length : lengths.keySet()) {
                 signals.stream()
-                        .filter(s -> s.length() == length)
-                        .findFirst()
-                        .ifPresent(s -> codes.put(lengths.get(length), sort(s)));
+                    .filter(s -> s.length() == length)
+                    .findFirst()
+                    .ifPresent(s -> codes.put(lengths.get(length), sort(s)));
             }
 
             var cf = Set.of(codes.get(1).split(""));
