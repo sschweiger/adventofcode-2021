@@ -55,7 +55,7 @@ public class Day9 extends AdventOfCodePuzzle {
         for (var row = 0; row < data.length; row++) {
             var columns = data[row].length;
             for (var col = 0; col < columns; col++) {
-                var basin = searchAdjacents(data, row, col);
+                var basin = searchNeighbors(data, row, col);
                 if (!basin.isEmpty()) {
                     basins.add(basin.size());
                     LOGGER.info("current: {}/{}, basin: {}", row, col, basin);
@@ -73,138 +73,46 @@ public class Day9 extends AdventOfCodePuzzle {
         return result.stream().reduce(1, (a, b) -> a * b);
     }
 
-    private List<Integer> searchAdjacents(int[][] data, int row, int col) {
-        var basin = new ArrayList<Integer>();
-
-        var value = data[row][col];
-        if (value == 9 || data[row][col] == -1) {
-            return basin;
+    private List<Integer> searchNeighbors(int[][] data, int row, int col) {
+        if (!isLocationToCheck(data, row, col)) {
+            return Collections.emptyList();
         }
 
-        basin.add(value);
+        var basin = new ArrayList<Integer>();
+        basin.add(data[row][col]);
         data[row][col] = -1;
 
-//        basin.addAll(searchNeighbors(data, row, col));
-        basin.addAll(searchLeft(data, row, col - 1));
-        basin.addAll(searchRight(data, row, col + 1));
-        basin.addAll(searchUp(data, row - 1, col));
-        basin.addAll(searchDown(data, row + 1, col));
+        basin.addAll(search(data, row, col - 1, 0, -1));
+        basin.addAll(search(data, row, col + 1, 0, 1));
+        basin.addAll(search(data, row - 1, col, -1, 0));
+        basin.addAll(search(data, row + 1, col, 1, 0));
 
-        if (basin.size() == 1) {
-            return Collections.emptyList();
+        return basin;
+    }
+
+    private List<Integer> search(int[][] data, int row, int col, int rowIncrement, int colIncrement) {
+        var basin = new ArrayList<Integer>();
+        while (isLocationToCheck(data, row, col)) {
+            basin.addAll(searchNeighbors(data, row, col));
+
+            row += rowIncrement;
+            col += colIncrement;
         }
 
         return basin;
     }
 
-    private List<Integer> searchNeighbors(int[][] data, int row, int col) {
-        var basin = new ArrayList<Integer>();
-        basin.addAll(searchLeft(data, row, col - 1));
-        basin.addAll(searchRight(data, row, col + 1));
-        basin.addAll(searchUp(data, row - 1, col));
-        basin.addAll(searchDown(data, row + 1, col));
-
-        return basin;
-    }
-
-    private List<Integer> searchLeft(int[][] data, int row, int col) {
+    private boolean isLocationToCheck(int[][] data, int row, int col) {
         if (row < 0 || row >= data.length || col < 0 || col >= data[row].length) {
-            return Collections.emptyList();
+            return false;
         }
 
         var value = data[row][col];
         if (value == 9 || value == -1) {
-            return Collections.emptyList();
+            return false;
         }
 
-        var basin = new ArrayList<Integer>();
-        for (var i = col; i >= 0; i--) { // search left
-            if (data[row][i] == 9 || data[row][i] == -1) {
-                break;
-            }
-
-            basin.add(value);
-            data[row][col] = -1;
-
-            basin.addAll(searchNeighbors(data, row, col));
-        }
-
-        return basin;
-    }
-
-    private List<Integer> searchRight(int[][] data, int row, int col) {
-        if (row < 0 || row >= data.length || col < 0 || col >= data[row].length) {
-            return Collections.emptyList();
-        }
-
-        var value = data[row][col];
-        if (value == 9 || value == -1) {
-            return Collections.emptyList();
-        }
-
-        var basin = new ArrayList<Integer>();
-        for (var i = col; i < data[row].length; i++) { // search right
-            if (data[row][i] == 9 || data[row][i] == -1) {
-                break;
-            }
-
-            basin.add(value);
-            data[row][col] = -1;
-
-            basin.addAll(searchNeighbors(data, row, col));
-        }
-
-        return basin;
-    }
-
-    private List<Integer> searchUp(int[][] data, int row, int col) {
-        if (row < 0 || row >= data.length || col < 0 || col >= data[row].length) {
-            return Collections.emptyList();
-        }
-
-        var value = data[row][col];
-        if (value == 9 || value == -1) {
-            return Collections.emptyList();
-        }
-
-        var basin = new ArrayList<Integer>();
-        for (var i = row; i >= 0; i--) { // search up
-            if (data[i][col] == 9 || data[i][col] == -1) {
-                break;
-            }
-
-            basin.add(value);
-            data[row][col] = -1;
-
-            basin.addAll(searchNeighbors(data, row, col));
-        }
-
-        return basin;
-    }
-
-    private List<Integer> searchDown(int[][] data, int row, int col) {
-        if (row < 0 || row >= data.length || col < 0 || col >= data[row].length) {
-            return Collections.emptyList();
-        }
-
-        var value = data[row][col];
-        if (value == 9 || value == -1) {
-            return Collections.emptyList();
-        }
-
-        var basin = new ArrayList<Integer>();
-        for (var i = row; i < data.length; i++) { // search down
-            if (data[i][col] == 9 || data[i][col] == -1) {
-                break;
-            }
-
-            basin.add(value);
-            data[row][col] = -1;
-
-            basin.addAll(searchNeighbors(data, row, col));
-        }
-
-        return basin;
+        return true;
     }
 
     private int[][] parse(List<String> lines) {
