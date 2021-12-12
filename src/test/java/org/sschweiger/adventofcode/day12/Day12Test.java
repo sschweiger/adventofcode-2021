@@ -64,4 +64,25 @@ class Day12Test {
 
         assertEquals(36, result);
     }
+
+    @Test
+    void shouldRunPart2WithLargerSampleData() {
+        var result = puzzle.part2(largerSample.lines().toList());
+
+        assertEquals(103, result);
+    }
+
+    @Test
+    void shouldRunPart2WithSampleData() {
+        var result = puzzle.testPart2();
+
+        assertEquals(3509, result);
+    }
+
+    @Test
+    void shouldRunPart2WithRealData() {
+        var result = puzzle.runPart2();
+
+        assertEquals(130493, result);
+    }
 }
