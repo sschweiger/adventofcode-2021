@@ -44,6 +44,6 @@ public class Line {
         return points;
     }
 
-    public static record Point(long x, long y) {
+    public record Point(long x, long y) {
     }
 }
