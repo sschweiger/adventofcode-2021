@@ -1,12 +1,12 @@
 package org.sschweiger.adventofcode.day12;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
-import org.apache.commons.lang3.builder.ToStringBuilder;
-import org.apache.commons.lang3.builder.ToStringStyle;
+import java.util.Map;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 import org.sschweiger.adventofcode.AdventOfCodePuzzle;
 
 public class Day12 extends AdventOfCodePuzzle {
@@ -18,173 +18,134 @@ public class Day12 extends AdventOfCodePuzzle {
 
     @Override
     protected long part1(List<String> lines) {
-        var nodes = new HashMap<String, Node>();
-        var paths = new HashMap<String, List<String>>();
+        var graph = buildGraph(lines);
+        return countPaths(graph, "start", "end", false);
+    }
+
+    @Override
+    protected long part2(List<String> lines) {
+        var graph = buildGraph(lines);
+        return countPaths(graph, "start", "end", true);
+    }
+
+    private Map<String, List<String>> buildGraph(List<String> lines) {
+        var graph = new HashMap<String, List<String>>();
 
         for (var line : lines) {
             var connection = line.split("-");
             var from = connection[0];
             var to = connection[1];
-            paths.computeIfAbsent(from, k -> new ArrayList<>()).add(to);
+            graph.computeIfAbsent(from, k -> new ArrayList<>()).add(to);
             if (!"start".equals(from) && !"end".equals(to)) {
-                paths.computeIfAbsent(to, k -> new ArrayList<>()).add(from);
-            }
-
-            var node = nodes.computeIfAbsent(from, Node::new);
-            var child = nodes.computeIfAbsent(to, Node::new);
-            node.addAdjacent(child);
-        }
-
-        var nodes2 = new HashMap<String, Node>();
-        for (var key : paths.keySet()) {
-            var node = nodes2.computeIfAbsent(key, Node::new);
-            for (var value : paths.get(key)) {
-                var neighbor = nodes2.computeIfAbsent(value, Node::new);
-                node.addAdjacent(neighbor);
-//                neighbor.addAdjacent(node);
+                graph.computeIfAbsent(to, k -> new ArrayList<>()).add(from);
             }
         }
-
-        for (var node : nodes2.values()) {
-            LOGGER.info("node2: {}", node);
-        }
-
-        LOGGER.info("paths: {}", paths);
-//        var result = getPaths(paths, null, "start", "start", new ArrayList<>());
-//        LOGGER.info("result: {}", result);
-
-        if (nodes.containsKey("start")) {
-            var root = nodes.get("start");
-            for (var path : root.findPaths()) {
-                LOGGER.info("path: {}", path);
-            }
-        }
-
-        for (var node : nodes.values()) {
-            LOGGER.info("{}", node);
-        }
-
-        return 0;
+        return graph;
     }
 
-//    private void getPaths(Map<String, List<String>> paths, String previous, String current, String path, List<List<String>> list) {
-//
-////        var result = new ArrayList<String>();
-//        if (previous != null) {
-////            result.add(previous + "->" + current);
-////            list.add(result);
-//
-//            path += previous + "->" + current;
-//        }
-//
-//        if ("end".equals(current)) {
-//            LOGGER.info("end reached, path={}", path);
-////            return list;
-//
-//            var result = new ArrayList<String>();
-//            result.add(previous + "->" + current);
-//            list.add(result);
-//
-//            return;
-//        }
-//
-//        if (previous != null && Character.isUpperCase(previous.charAt(0))) {
-//            LOGGER.info("{} -> {}", current, previous);
-//
-//            getPaths(paths, current, previous, path + "->", list);
-//        }
-//
-//        var children = paths.get(current);
-//        for (var child : children) {
-//            if (paths.containsKey(child) && paths.get(child).size() == 1 && StringUtils.equals(paths.get(child).get(0),
-//                current)) {
-//                continue;
-//            }
-//
-//            if (StringUtils.equals(previous, child)) {
-//                continue;
-//            }
-//
-//            LOGGER.info("{} -> {}", current, child);
-//
-//            var result = new ArrayList<String>();
-//            result.add(previous + "->" + current);
-//            result.addAll(getPaths(paths, current, child, path + "->" + child + "->"));
-//            list.add(result);
-//        }
-//
-//        return result;
-//    }
+    private long countPaths(Map<String, List<String>> graph, String start, String end,
+        boolean allowVisitOneSmallCaveTwice) {
+        var count = 0;
 
-    @Override
-    protected long part2(List<String> lines) {
-        return 0;
+        var paths = followPath(graph, new ArrayList<>(), start, allowVisitOneSmallCaveTwice);
+        for (var newPath : paths) {
+            if (newPath.get(newPath.size() - 1).equals(end)) {
+                LOGGER.info("path from {} to {}: {}", start, end, newPath);
+                count++;
+            }
+        }
+
+        return count;
     }
 
-    private class Node {
-        private final String node;
-        private final boolean bigCave;
-        private final List<Node> adjacents = new ArrayList<>();
-        private final Set<String> visitedPaths = new HashSet<>();
+    private List<List<String>> followPath(Map<String, List<String>> graph, List<String> path, String current,
+        boolean allowVisitOneSmallCaveTwice) {
 
-        private Node parent;
-
-        public Node(String node) {
-            this.node = node;
-            this.bigCave = Character.isUpperCase(node.charAt(0));
+        var nexts = graph.getOrDefault(current, Collections.emptyList());
+        if (!current.equals("end") && (nexts.isEmpty() || nexts.size() == 1 && isSmallCave(nexts.get(0)))) {
+            var newPath = new ArrayList<String>();
+            newPath.addAll(path);
+            return Collections.singletonList(newPath);
         }
 
-        public void addAdjacent(Node node) {
-            node.parent = this;
-            this.adjacents.add(node);
+        path.add(current);
+
+        if (current.equals("end")) {
+            var newPath = new ArrayList<String>();
+            newPath.addAll(path);
+            return Collections.singletonList(newPath);
         }
 
-        public List<String> findPaths() {
-            List<String> result = new ArrayList<>();
-            if (adjacents.isEmpty()) {
-                result.add(node);
-            }
+        var neighbors = graph.getOrDefault(current, Collections.emptyList())
+            .stream()
+            .filter(neighbor -> !alreadyVisited(path, neighbor))
+            .filter(neighbor -> isNextStepAllowed(path, neighbor, allowVisitOneSmallCaveTwice))
+            .toList();
 
-            result.addAll(getPaths(adjacents));
-            return result;
+        var paths = new ArrayList<List<String>>();
+        for (var neighbor : neighbors) {
+            paths.addAll(followPath(graph, new ArrayList<>(path), neighbor, allowVisitOneSmallCaveTwice));
         }
 
-        public List<String> getPaths(List<Node> nodes) {
-            List<String> result = new ArrayList<>();
-
-            for (var child : nodes) {
-                if (bigCave && !"end".equals(child.node)) {
-                    var temp = new ArrayList<>(nodes);
-                    temp.remove(child);
-
-                    for (var path : getPaths(temp)) {
-                        result.add(node + " -> " + child.node + " -> " + path);
-                    }
-                }
-
-                if (!bigCave && !child.bigCave && !"end".equals(child.node)) {
-                    continue;
-                }
-
-                for (var path : child.findPaths()) {
-                    result.add(node + " -> " + path);
-                }
-            }
-
-            return result;
+        if (paths.isEmpty()) {
+            var newPath = new ArrayList<String>();
+            newPath.addAll(path);
+            paths.add(newPath);
         }
 
-        @Override
-        public String toString() {
-//            StringBuilder builder = new StringBuilder();
-//            builder.append(node)
-            return new ToStringBuilder(this, ToStringStyle.SIMPLE_STYLE)
-                .append("node", node)
-                .append("children", adjacents)
-//                .append("visitedPaths", visitedPaths)
-//                .append("parent", parent)
-                .toString();
-        }
+        return paths;
     }
 
+    private boolean isNextStepAllowed(List<String> path, String next, boolean allowVisitOneSmallCaveTwice) {
+        if ("end".equals(next)) {
+            return true;
+        }
+
+        if (!isSmallCave(next)) {
+            return true;
+        }
+
+        if (!path.contains(next)) {
+            return true;
+        }
+
+        if (allowVisitOneSmallCaveTwice) {
+            return path.stream()
+                .filter(this::isSmallCave)
+                .collect(Collectors.groupingBy(Function.identity(), Collectors.counting()))
+                .values().stream()
+                .filter(count -> count > 1)
+                .findFirst()
+                .isEmpty();
+        }
+
+        return false;
+//            .values().stream()
+//            .filter(count -> count > 1)
+//            .toList();
+
+//        return !path.contains(next) || counts.values().stream().filter(count -> count > 1).findFirst().isEmpty();
+    }
+
+    private boolean alreadyVisited(List<String> path, String neighbor) {
+        if (path.size() < 2) {
+            return false;
+        }
+
+        var current = path.get(path.size() - 1);
+        for (int i = path.size() - 1; i >= 1; i--) {
+            var to = path.get(i);
+            var from = path.get(i - 1);
+
+            if (from.equals(current) && to.equals(neighbor)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    private boolean isSmallCave(String cave) {
+        return Character.isLowerCase(cave.charAt(0));
+    }
 }
